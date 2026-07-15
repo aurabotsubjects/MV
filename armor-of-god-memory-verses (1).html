@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Armor of God — Memory Verses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cinzel+Decorative:wght@700;900&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night-1:#161033;
+    --night-2:#2b1858;
+    --night-3:#3d1f6b;
+    --gold:#f4c94c;
+    --gold-bright:#ffe08a;
+    --amber:#f0a94e;
+    --parchment:#fbf4e2;
+    --silver:#dfe6f2;
+
+    --love:#e8536a;
+    --love-soft:#ffd7dd;
+    --know:#4d7cf0;
+    --know-soft:#d9e4ff;
+    --serve:#2eaa76;
+    --serve-soft:#d3f5e6;
+    --impact:#a25be0;
+    --impact-soft:#ecdcff;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;width:100%;
+    overflow:hidden;
+    font-family:'Baloo 2',sans-serif;
+    color:var(--parchment);
+  }
+
+  /* ---------- ANIMATED SKY BACKGROUND ---------- */
+  .sky{
+    position:fixed;inset:0;z-index:0;
+    background:linear-gradient(125deg,var(--night-1),var(--night-2) 45%,var(--night-3) 75%,#4a2560 100%);
+    background-size:300% 300%;
+    animation:driftSky 22s ease-in-out infinite;
+  }
+  @keyframes driftSky{
+    0%{background-position:0% 30%;}
+    50%{background-position:100% 70%;}
+    100%{background-position:0% 30%;}
+  }
+  .glow{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(circle at 18% 22%, rgba(244,201,76,0.16), transparent 40%),
+      radial-gradient(circle at 82% 78%, rgba(162,91,224,0.20), transparent 45%),
+      radial-gradient(circle at 75% 15%, rgba(77,124,240,0.14), transparent 40%);
+  }
+  .stars{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+  .star{
+    position:absolute;border-radius:50%;
+    background:var(--gold-bright);
+    opacity:.85;
+    box-shadow:0 0 8px 2px rgba(255,224,138,0.7);
+    animation:twinkle linear infinite;
+  }
+  @keyframes twinkle{
+    0%,100%{opacity:.15;transform:scale(0.7) translateY(0);}
+    50%{opacity:1;transform:scale(1.15) translateY(-6px);}
+  }
+
+  /* ---------- SHARED ---------- */
+  .screen{
+    position:relative;z-index:1;
+    height:100vh;width:100vw;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:16px;
+  }
+  .hidden{display:none !important;}
+
+  /* ---------- COVER PAGE ---------- */
+  #cover .kicker{
+    font-family:'Cinzel',serif;
+    letter-spacing:.35em;
+    font-size:clamp(11px,1.6vw,15px);
+    color:var(--gold);
+    text-transform:uppercase;
+    margin:0 0 6px 0;
+    opacity:.9;
+  }
+  #cover h1{
+    font-family:'Cinzel Decorative',serif;
+    font-size:clamp(28px,6vw,58px);
+    margin:0 0 2px 0;
+    text-align:center;
+    background:linear-gradient(180deg,var(--gold-bright),var(--gold) 60%,var(--amber));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 2px 18px rgba(244,201,76,0.25);
+    line-height:1.05;
+  }
+  #cover h2{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:600;
+    font-size:clamp(13px,2.2vw,18px);
+    color:var(--silver);
+    margin:0 0 18px 0;
+    text-align:center;
+    opacity:.85;
+  }
+  .armor-wrap{
+    position:relative;
+    width:min(78vw,340px);
+    aspect-ratio:3/4;
+    margin:6px auto 14px auto;
+    filter:drop-shadow(0 10px 30px rgba(0,0,0,0.45));
+  }
+  .armor-wrap svg{width:100%;height:100%;display:block;overflow:visible;}
+
+  .part-label{
+    position:absolute;
+    font-family:'Cinzel',serif;
+    font-size:clamp(8px,1.5vw,10.5px);
+    letter-spacing:.06em;
+    color:var(--silver);
+    background:rgba(20,12,45,0.55);
+    border:1px solid rgba(223,230,242,0.25);
+    padding:3px 7px;
+    border-radius:20px;
+    white-space:nowrap;
+    pointer-events:none;
+    backdrop-filter:blur(2px);
+  }
+  .lbl-helmet{top:0%;left:50%;transform:translate(-50%,-6px);}
+  .lbl-breast{top:33%;left:8%;transform:translateX(-2px);}
+  .lbl-belt{top:52%;left:50%;transform:translate(-50%,0);}
+  .lbl-shield{top:38%;left:2%;transform:translate(-92%,0);text-align:right;}
+  .lbl-shoes{bottom:-2%;left:50%;transform:translate(-50%,0);}
+  .lbl-sword{top:20%;right:1%;transform:translate(94%,0);color:var(--gold-bright);border-color:rgba(244,201,76,0.6);}
+
+  .sword-hotspot{cursor:pointer;}
+  .sword-glow{
+    animation:swordPulse 2.1s ease-in-out infinite;
+    transform-origin:center;
+  }
+  @keyframes swordPulse{
+    0%,100%{opacity:1;filter:drop-shadow(0 0 4px rgba(255,224,138,0.6));}
+    50%{opacity:1;filter:drop-shadow(0 0 16px rgba(255,224,138,1));}
+  }
+
+  .tap-hint{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:clamp(13px,2.4vw,17px);
+    color:var(--gold-bright);
+    margin-top:4px;
+    text-align:center;
+    animation:hintBob 1.8s ease-in-out infinite;
+  }
+  @keyframes hintBob{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(4px);}
+  }
+  .tap-hint span{
+    display:inline-block;
+    border-bottom:2px dashed rgba(255,224,138,0.6);
+  }
+
+  .verse-ref-cover{
+    margin-top:14px;
+    font-size:clamp(11px,1.8vw,13px);
+    color:var(--silver);
+    opacity:.75;
+    text-align:center;
+    font-style:italic;
+  }
+
+  /* ---------- APP PAGE ---------- */
+  #app{ justify-content:flex-start; padding-top:14px; gap:0;}
+  .app-header{
+    width:100%;max-width:900px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .back-btn{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.25);
+    color:var(--parchment);
+    font-family:'Baloo 2',sans-serif;font-weight:700;
+    padding:8px 14px;border-radius:14px;cursor:pointer;
+    font-size:13px;
+    display:flex;align-items:center;gap:6px;
+    transition:.2s;
+  }
+  .back-btn:hover{background:rgba(255,255,255,0.18);}
+
+  .app-title{
+    font-family:'Cinzel',serif;
+    font-size:clamp(14px,2vw,20px);
+    letter-spacing:.08em;
+    color:var(--gold-bright);
+    text-align:center;
+    flex:1;
+  }
+
+  .tabs{
+    display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
+    width:100%;max-width:900px;margin-bottom:12px;
+  }
+  .tab{
+    font-family:'Baloo 2',sans-serif;font-weight:700;font-size:clamp(12px,1.6vw,14.5px);
+    padding:9px 16px;border-radius:999px;cursor:pointer;
+    border:2px solid transparent;
+    color:#1c1330;
+    transition:.18s transform ease,.18s box-shadow ease;
+    user-select:none;
+  }
+  .tab:hover{transform:translateY(-2px);}
+  .tab.active{box-shadow:0 4px 14px rgba(0,0,0,0.35);transform:translateY(-2px);border-color:rgba(255,255,255,0.6);}
+  .tab[data-cat="all"]{background:var(--silver);}
+  .tab[data-cat="love"]{background:var(--love-soft);}
+  .tab[data-cat="know"]{background:var(--know-soft);}
+  .tab[data-cat="serve"]{background:var(--serve-soft);}
+  .tab[data-cat="impact"]{background:var(--impact-soft);}
+
+  .controls{
+    width:100%;max-width:900px;
+    display:flex;align-items:center;gap:10px;justify-content:center;
+    margin-bottom:14px;
+  }
+  select#verseSelect{
+    font-family:'Baloo 2',sans-serif;font-weight:700;
+    font-size:clamp(13px,2vw,16px);
+    padding:10px 14px;border-radius:12px;
+    border:2px solid rgba(255,255,255,0.35);
+    background:rgba(255,255,255,0.1);
+    color:var(--parchment);
+    max-width:65vw;
+    cursor:pointer;
+  }
+  select#verseSelect option{color:#1c1330;}
+
+  .nav-btn{
+    width:42px;height:42px;border-radius:50%;
+    border:2px solid rgba(255,255,255,0.35);
+    background:rgba(255,255,255,0.1);
+    color:var(--parchment);
+    font-size:18px;font-weight:800;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:.15s;
+    flex-shrink:0;
+  }
+  .nav-btn:hover{background:rgba(255,255,255,0.25);transform:scale(1.06);}
+
+  /* ---------- VERSE CARD ---------- */
+  .card-wrap{
+    flex:1;width:100%;max-width:920px;
+    display:flex;align-items:center;justify-content:center;
+    min-height:0;
+    padding-bottom:10px;
+  }
+  .verse-card{
+    width:100%;height:100%;
+    max-height:62vh;
+    background:linear-gradient(160deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04));
+    border:1.5px solid rgba(255,255,255,0.22);
+    border-radius:26px;
+    padding:clamp(20px,4vw,44px);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;
+    box-shadow:0 18px 50px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+    overflow-y:auto;
+    animation:cardIn .35s ease;
+    position:relative;
+  }
+  @keyframes cardIn{
+    from{opacity:0;transform:translateY(10px) scale(.98);}
+    to{opacity:1;transform:translateY(0) scale(1);}
+  }
+  .cat-chip{
+    font-family:'Cinzel',serif;font-size:clamp(10px,1.4vw,12px);
+    letter-spacing:.12em;text-transform:uppercase;
+    padding:5px 14px;border-radius:999px;
+    margin-bottom:16px;font-weight:700;
+    color:#1c1330;
+  }
+  .verse-number{
+    font-family:'Cinzel',serif;
+    font-size:clamp(11px,1.6vw,14px);
+    color:var(--gold);
+    opacity:.8;
+    margin-bottom:6px;
+    letter-spacing:.1em;
+  }
+  .verse-text{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:clamp(22px,4.6vw,42px);
+    line-height:1.32;
+    color:var(--parchment);
+    max-width:820px;
+    text-shadow:0 2px 14px rgba(0,0,0,0.25);
+  }
+  .verse-reference{
+    margin-top:22px;
+    font-family:'Cinzel Decorative',serif;
+    font-size:clamp(16px,2.6vw,24px);
+    color:var(--gold-bright);
+  }
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.25);border-radius:10px;}
+
+  @media (max-width:560px){
+    .app-header{margin-bottom:6px;}
+    .tabs{margin-bottom:8px;}
+    .verse-card{max-height:56vh;border-radius:20px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important;animation-iteration-count:1 !important;}
+    .sky{animation:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="sky"></div>
+<div class="glow"></div>
+<div class="stars" id="stars"></div>
+
+<!-- ===================== COVER PAGE ===================== -->
+<div class="screen" id="cover">
+  <p class="kicker">Ephesians 6:10&ndash;18</p>
+  <h1>The Armor of God</h1>
+  <h2>100 Bible Memory Verses for Aroha &middot; M&#333;hio &middot; Manaaki &middot; P&#257;nga</h2>
+
+  <div class="armor-wrap">
+    <div class="part-label lbl-helmet">Helmet of Salvation</div>
+    <div class="part-label lbl-shield">Shield of Faith</div>
+    <div class="part-label lbl-breast">Breastplate of Righteousness</div>
+    <div class="part-label lbl-belt">Belt of Truth</div>
+    <div class="part-label lbl-sword">Sword of the Spirit</div>
+    <div class="part-label lbl-shoes">Shoes of Peace</div>
+
+    <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#e9edf5"/>
+          <stop offset="55%" stop-color="#b9c3d6"/>
+          <stop offset="100%" stop-color="#8b93a8"/>
+        </linearGradient>
+        <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#ffe9a8"/>
+          <stop offset="55%" stop-color="#f4c94c"/>
+          <stop offset="100%" stop-color="#c9932a"/>
+        </linearGradient>
+        <linearGradient id="cape" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#5a3aa8"/>
+          <stop offset="100%" stop-color="#2b1858"/>
+        </linearGradient>
+      </defs>
+
+      <!-- cape -->
+      <path d="M150 90 C90 110 60 190 70 320 L100 300 C95 220 115 140 150 110 Z" fill="url(#cape)" opacity="0.85"/>
+      <path d="M150 90 C210 110 240 190 230 320 L200 300 C205 220 185 140 150 110 Z" fill="url(#cape)" opacity="0.85"/>
+
+      <!-- legs / shoes of peace -->
+      <rect x="120" y="300" width="24" height="55" rx="8" fill="url(#metal)"/>
+      <rect x="156" y="300" width="24" height="55" rx="8" fill="url(#metal)"/>
+      <path d="M108 352 q18 -10 40 0 l-2 14 q-18 8 -36 0 Z" fill="url(#goldGrad)"/>
+      <path d="M152 352 q18 -10 40 0 l-2 14 q-18 8 -36 0 Z" fill="url(#goldGrad)"/>
+      <path d="M100 358 q6 6 2 12" stroke="#ffe08a" stroke-width="3" fill="none" opacity="0.8"/>
+      <path d="M200 358 q-6 6 -2 12" stroke="#ffe08a" stroke-width="3" fill="none" opacity="0.8"/>
+
+      <!-- torso / breastplate -->
+      <path d="M110 165 Q150 150 190 165 L198 270 Q150 292 102 270 Z" fill="url(#metal)" stroke="#7a8296" stroke-width="2"/>
+      <path d="M150 168 L150 275" stroke="#7a8296" stroke-width="2" opacity="0.6"/>
+      <circle cx="150" cy="205" r="14" fill="url(#goldGrad)" stroke="#a8792a" stroke-width="1.5"/>
+      <path d="M150 197 L154 205 L150 213 L146 205 Z" fill="#fff7e0"/>
+
+      <!-- belt of truth -->
+      <rect x="100" y="255" width="100" height="20" rx="6" fill="url(#goldGrad)" stroke="#a8792a" stroke-width="1.5"/>
+      <rect x="136" y="253" width="28" height="24" rx="5" fill="#fff3cf" stroke="#a8792a" stroke-width="1.5"/>
+
+      <!-- left arm + shield of faith -->
+      <path d="M110 175 Q88 190 82 225 L96 240 Q104 205 118 190 Z" fill="url(#metal)"/>
+      <path d="M40 200 Q35 240 55 280 Q75 292 92 280 Q108 240 90 200 Q65 185 40 200 Z" fill="url(#goldGrad)" stroke="#a8792a" stroke-width="2"/>
+      <path d="M65 205 L65 275 M45 230 L88 230" stroke="#fff7e0" stroke-width="3" opacity="0.7"/>
+
+      <!-- right arm + sword of the spirit -->
+      <path d="M190 175 Q212 190 218 222 L204 236 Q198 205 182 190 Z" fill="url(#metal)"/>
+      <g class="sword-hotspot sword-glow" id="swordGroup">
+        <rect x="222" y="140" width="10" height="100" rx="3" fill="url(#silverBlade)" />
+        <rect x="222" y="140" width="10" height="100" rx="3" fill="#eef2fa" stroke="#c7cfdd" stroke-width="1.5"/>
+        <rect x="208" y="228" width="38" height="9" rx="3" fill="url(#goldGrad)" stroke="#a8792a" stroke-width="1"/>
+        <rect x="221" y="236" width="12" height="26" rx="4" fill="#8a5a1e"/>
+        <circle cx="227" cy="266" r="8" fill="url(#goldGrad)" stroke="#a8792a" stroke-width="1.5"/>
+      </g>
+
+      <!-- neck + helmet of salvation -->
+      <rect x="140" y="140" width="20" height="18" fill="#c7cfdd"/>
+      <circle cx="150" cy="105" r="38" fill="url(#metal)" stroke="#7a8296" stroke-width="2"/>
+      <path d="M118 100 Q150 128 182 100 L178 118 Q150 140 122 118 Z" fill="#241736"/>
+      <rect x="146" y="72" width="8" height="26" rx="3" fill="url(#goldGrad)"/>
+      <path d="M126 78 Q150 62 174 78" stroke="url(#goldGrad)" stroke-width="4" fill="none"/>
+    </svg>
+  </div>
+
+  <p class="tap-hint"><span>&#9876;&#65039; Tap the Sword of the Spirit to begin</span></p>
+  <p class="verse-ref-cover">&ldquo;For the word of God is quick, and powerful...&rdquo; &mdash; Hebrews 4:12</p>
+</div>
+
+<!-- ===================== APP PAGE ===================== -->
+<div class="screen" id="app" style="display:none;">
+  <div class="app-header">
+    <button class="back-btn" id="backBtn">&larr; Armor</button>
+    <div class="app-title">Sword of the Spirit &mdash; Memory Verses</div>
+    <div style="width:76px;"></div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-cat="all">All 100</div>
+    <div class="tab" data-cat="love">Aroha &middot; Love</div>
+    <div class="tab" data-cat="know">M&#333;hio &middot; Know</div>
+    <div class="tab" data-cat="serve">Manaaki &middot; Serve</div>
+    <div class="tab" data-cat="impact">P&#257;nga &middot; Impact</div>
+  </div>
+
+  <div class="controls">
+    <button class="nav-btn" id="prevBtn" aria-label="Previous verse">&#8249;</button>
+    <select id="verseSelect"></select>
+    <button class="nav-btn" id="nextBtn" aria-label="Next verse">&#8250;</button>
+  </div>
+
+  <div class="card-wrap">
+    <div class="verse-card" id="verseCard">
+      <div class="cat-chip" id="catChip">Aroha &middot; Love</div>
+      <div class="verse-number" id="verseNumber">Verse 1 of 100</div>
+      <div class="verse-text" id="verseText"></div>
+      <div class="verse-reference" id="verseReference"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ======================= STARFIELD ======================= */
+(function(){
+  const stars = document.getElementById('stars');
+  const n = 45;
+  for(let i=0;i<n;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = (Math.random()*2.4+1).toFixed(1);
+    s.style.width = size+'px';
+    s.style.height = size+'px';
+    s.style.left = (Math.random()*100)+'%';
+    s.style.top = (Math.random()*100)+'%';
+    s.style.animationDuration = (Math.random()*3+2.5)+'s';
+    s.style.animationDelay = (Math.random()*3)+'s';
+    stars.appendChild(s);
+  }
+})();
+
+/* ======================= VERSE DATA ======================= */
+/* categories: love (Aroha), know (Mohio), serve (Manaaki), impact (Panga) */
+const VERSES = [
+  {c:"love",r:"John 3:16",t:"For God so loved the world, that he gave his only born Son, that whoever believes in him should not perish, but have eternal life."},
+  {c:"love",r:"1 John 4:19",t:"We love him, because he first loved us."},
+  {c:"love",r:"Mark 12:30\u201331",t:"You shall love the Lord your God with all your heart, with all your soul, with all your mind, and with all your strength. This is the first commandment. The second is like this: You shall love your neighbour as yourself. There is no other commandment greater than these."},
+  {c:"love",r:"1 Corinthians 13:4",t:"Love is patient and is kind. Love doesn\u2019t envy. Love doesn\u2019t brag, is not proud."},
+  {c:"love",r:"1 Corinthians 13:13",t:"But now faith, hope, and love remain \u2014 these three. The greatest of these is love."},
+  {c:"love",r:"John 13:34",t:"A new commandment I give to you, that you love one another. Just as I have loved you, you also love one another."},
+  {c:"love",r:"Romans 5:8",t:"But God shows his own love toward us, in that while we were still sinners, Christ died for us."},
+  {c:"love",r:"1 John 4:7",t:"Beloved, let us love one another, for love is of God, and everyone who loves is born of God and knows God."},
+  {c:"love",r:"Ephesians 4:32",t:"Be kind to one another, tender-hearted, forgiving each other, just as God also in Christ forgave you."},
+  {c:"love",r:"Colossians 3:14",t:"Above all these things, put on love, which is the bond of perfection."},
+  {c:"love",r:"1 Peter 4:8",t:"Above all things be earnest in your love for one another, for love covers a multitude of sins."},
+  {c:"love",r:"John 15:13",t:"Greater love has no one than this, that someone lay down his life for his friends."},
+  {c:"love",r:"1 John 4:11",t:"Beloved, if God loved us this way, we also ought to love one another."},
+  {c:"love",r:"Proverbs 17:17",t:"A friend loves at all times, and a brother is born for adversity."},
+  {c:"love",r:"Galatians 5:22\u201323",t:"But the fruit of the Spirit is love, joy, peace, patience, kindness, goodness, faith, gentleness, and self-control. Against such things there is no law."},
+  {c:"love",r:"Psalm 136:1",t:"Give thanks to the LORD, for he is good, for his loving kindness endures forever."},
+  {c:"love",r:"Romans 12:10",t:"In love of the family, be tenderly affectioned one to another. In honour, prefer one another."},
+  {c:"love",r:"1 John 3:18",t:"Little children, let us not love in word only, or with the tongue only, but in deed and truth."},
+  {c:"love",r:"Zephaniah 3:17",t:"The LORD your God is among you, a mighty one who will save. He will rejoice over you with joy. He will calm you with his love. He will rejoice over you with singing."},
+  {c:"love",r:"Jeremiah 31:3",t:"The LORD appeared long ago to me, saying, \u201CI have loved you with an everlasting love. Therefore I have continued to be loving and kind to you.\u201D"},
+  {c:"love",r:"Deuteronomy 6:5",t:"You shall love the LORD your God with all your heart, with all your soul, and with all your strength."},
+  {c:"love",r:"John 14:15",t:"If you love me, keep my commandments."},
+  {c:"love",r:"1 Corinthians 16:14",t:"Let all that you do be done in love."},
+  {c:"love",r:"Matthew 22:37\u201339",t:"You shall love the Lord your God with all your heart, with all your soul, and with all your mind. This is the first and great commandment. And a second is like it: You shall love your neighbour as yourself."},
+  {c:"love",r:"Romans 13:8",t:"Owe no one anything, except to love one another, for the one who loves his neighbour has fulfilled the law."},
+
+  {c:"know",r:"Jeremiah 29:11",t:"For I know the plans I have for you, says the LORD: plans for peace, and not for disaster, to give you a future and a hope."},
+  {c:"know",r:"Proverbs 3:5\u20136",t:"Trust in the LORD with all your heart, and don\u2019t lean on your own understanding. In all your ways acknowledge him, and he will make your paths straight."},
+  {c:"know",r:"Psalm 139:14",t:"I will give thanks to you, for I am fearfully and wonderfully made. Your works are wonderful. My soul knows that very well."},
+  {c:"know",r:"Genesis 1:1",t:"In the beginning, God created the heavens and the earth."},
+  {c:"know",r:"John 1:1",t:"In the beginning was the Word, and the Word was with God, and the Word was God."},
+  {c:"know",r:"Isaiah 40:31",t:"Those who wait for the LORD will renew their strength. They will mount up with wings like eagles. They will run and not be weary. They will walk and not faint."},
+  {c:"know",r:"Psalm 119:105",t:"Your word is a lamp to my feet, and a light for my path."},
+  {c:"know",r:"2 Timothy 3:16",t:"Every Scripture is God-breathed and profitable for teaching, for reproof, for correction, and for training in righteousness."},
+  {c:"know",r:"Psalm 46:10",t:"Be still, and know that I am God. I will be exalted among the nations. I will be exalted in the earth."},
+  {c:"know",r:"Isaiah 55:8\u20139",t:"\u201CFor my thoughts are not your thoughts, and your ways are not my ways,\u201D says the LORD. \u201CFor as the heavens are higher than the earth, so are my ways higher than your ways, and my thoughts than your thoughts.\u201D"},
+  {c:"know",r:"Psalm 100:3",t:"Know that the LORD, he is God. It is he who made us, and we are his. We are his people, and the sheep of his pasture."},
+  {c:"know",r:"Exodus 20:3",t:"You shall have no other gods before me."},
+  {c:"know",r:"Deuteronomy 6:4",t:"Hear, O Israel: the LORD is our God. The LORD is one."},
+  {c:"know",r:"Psalm 90:2",t:"Before the mountains were born, before you had formed the earth and the world, from everlasting to everlasting, you are God."},
+  {c:"know",r:"Colossians 1:16",t:"By him all things were created, in the heavens and on the earth, visible and invisible. All things have been created through him and for him."},
+  {c:"know",r:"Hebrews 11:1",t:"Now faith is being sure of what we hope for, and certain of what we do not see."},
+  {c:"know",r:"Romans 8:28",t:"We know that all things work together for good for those who love God, for those who are called according to his purpose."},
+  {c:"know",r:"Psalm 139:13",t:"You formed my inmost being. You knit me together in my mother\u2019s womb."},
+  {c:"know",r:"John 14:6",t:"Jesus said to him, \u201CI am the way, the truth, and the life. No one comes to the Father except through me.\u201D"},
+  {c:"know",r:"Isaiah 41:10",t:"Don\u2019t be afraid, for I am with you. Don\u2019t be dismayed, for I am your God. I will strengthen you. I will help you. I will uphold you with my righteous right hand."},
+  {c:"know",r:"Psalm 23:1",t:"The LORD is my shepherd; I shall lack nothing."},
+  {c:"know",r:"Matthew 6:33",t:"But seek first God\u2019s Kingdom and his righteousness, and all these things will be given to you as well."},
+  {c:"know",r:"Proverbs 1:7",t:"The fear of the LORD is the beginning of knowledge, but fools despise wisdom and instruction."},
+  {c:"know",r:"John 8:32",t:"You will know the truth, and the truth will set you free."},
+  {c:"know",r:"2 Corinthians 5:17",t:"Therefore if anyone is in Christ, he is a new creation. The old things have passed away. See, all things have become new."},
+
+  {c:"serve",r:"1 Peter 4:10",t:"As each has received a gift, use it to serve one another, as good managers of God\u2019s grace in its many forms."},
+  {c:"serve",r:"Galatians 5:13",t:"For you were called to freedom. Only don\u2019t use your freedom as an opportunity for the flesh, but through love serve one another."},
+  {c:"serve",r:"Colossians 3:23",t:"Whatever you do, work at it heartily, as for the Lord and not for men."},
+  {c:"serve",r:"Mark 10:45",t:"For even the Son of Man came not to be served, but to serve, and to give his life as a ransom for many."},
+  {c:"serve",r:"Joshua 24:15",t:"Choose for yourselves today whom you will serve...but as for me and my house, we will serve the LORD."},
+  {c:"serve",r:"Matthew 20:26\u201328",t:"Whoever wants to become great among you shall be your servant. Whoever wants to be first among you shall be your slave."},
+  {c:"serve",r:"Romans 12:6",t:"Having gifts that differ according to the grace given to us, let us use them well."},
+  {c:"serve",r:"Ephesians 2:10",t:"For we are God\u2019s workmanship, created in Christ Jesus for good works, which God prepared beforehand, that we should walk in them."},
+  {c:"serve",r:"1 Corinthians 12:27",t:"Now you are the body of Christ, and individually members of it."},
+  {c:"serve",r:"Philippians 2:3\u20134",t:"Do nothing through selfish ambition or vanity, but in humility count others better than yourselves, each looking not to his own interests, but to the interests of others."},
+  {c:"serve",r:"Galatians 6:9",t:"Let us not grow weary in doing good, for we will reap a harvest in due season, if we don\u2019t give up."},
+  {c:"serve",r:"1 Timothy 4:12",t:"Let no one look down on your youth, but be an example to the believers in word, in conduct, in love, in spirit, in faith, and in purity."},
+  {c:"serve",r:"Hebrews 6:10",t:"For God is not unjust, so as to forget your work and the love you showed for his name, in that you served the saints, and still do serve them."},
+  {c:"serve",r:"1 Peter 4:11",t:"...so that in everything God may be glorified through Jesus Christ, to whom belong the glory and the power forever and ever. Amen."},
+  {c:"serve",r:"James 1:22",t:"But be doers of the word, and not hearers only, deceiving yourselves."},
+  {c:"serve",r:"Matthew 25:40",t:"...Truly I tell you, whatever you did for one of the least of these brothers and sisters of mine, you did for me."},
+  {c:"serve",r:"Proverbs 3:27",t:"Don\u2019t withhold good from those to whom it is due, when it is in your power to do it."},
+  {c:"serve",r:"Luke 6:38",t:"Give, and it will be given to you: good measure, pressed down, shaken together, and running over, will be given to you."},
+  {c:"serve",r:"2 Corinthians 9:7",t:"Let each one give as he has decided in his heart, not reluctantly or under compulsion, for God loves a cheerful giver."},
+  {c:"serve",r:"Romans 12:1",t:"I urge you, brothers and sisters, by the mercies of God, to offer your bodies as a living sacrifice, holy and pleasing to God \u2014 this is your true and proper worship."},
+  {c:"serve",r:"1 Corinthians 10:31",t:"So whether you eat or drink, or whatever you do, do it all for the glory of God."},
+  {c:"serve",r:"Matthew 5:16",t:"Let your light shine before others, that they may see your good works and give glory to your Father who is in heaven."},
+  {c:"serve",r:"Acts 20:35",t:"...It is more blessed to give than to receive."},
+  {c:"serve",r:"Ephesians 6:7",t:"With good will doing service, as to the Lord, and not to men."},
+  {c:"serve",r:"Colossians 3:17",t:"Whatever you do, in word or in deed, do it all in the name of the Lord Jesus, giving thanks to God the Father through him."},
+
+  {c:"impact",r:"Matthew 5:14",t:"You are the light of the world. A city set on a hill cannot be hidden."},
+  {c:"impact",r:"Matthew 28:19\u201320",t:"Go and make disciples of all nations, baptising them in the name of the Father and of the Son and of the Holy Spirit, teaching them to obey everything I have commanded you. And remember, I am with you always, to the very end of the age."},
+  {c:"impact",r:"Matthew 6:10",t:"Let your Kingdom come. Let your will be done on earth, as it is in heaven."},
+  {c:"impact",r:"Philippians 4:13",t:"I can do all things through Christ, who strengthens me."},
+  {c:"impact",r:"2 Corinthians 5:20",t:"We are therefore ambassadors for Christ, as though God were making his appeal through us. We beg you on Christ\u2019s behalf: be reconciled to God."},
+  {c:"impact",r:"Isaiah 6:8",t:"...Here I am. Send me!"},
+  {c:"impact",r:"Matthew 5:13",t:"You are the salt of the earth. But if the salt loses its saltiness, how can it be made salty again?"},
+  {c:"impact",r:"Acts 1:8",t:"You will receive power when the Holy Spirit comes on you, and you will be my witnesses in Jerusalem, and in all Judea and Samaria, and to the ends of the earth."},
+  {c:"impact",r:"Romans 12:2",t:"Don\u2019t be conformed to this world, but be transformed by the renewing of your mind, so that you may know what is the good, pleasing, and perfect will of God."},
+  {c:"impact",r:"Ephesians 2:8\u20139",t:"For it is by grace you have been saved, through faith \u2014 and this is not from yourselves, it is the gift of God \u2014 not by works, so that no one can boast."},
+  {c:"impact",r:"James 2:17",t:"So faith, if it has no works, is dead, being alone."},
+  {c:"impact",r:"1 Peter 2:9",t:"But you are a chosen people, a royal priesthood, a holy nation, God\u2019s special possession, that you may proclaim the excellencies of him who called you out of darkness into his marvellous light."},
+  {c:"impact",r:"Matthew 5:9",t:"Blessed are the peacemakers, for they shall be called children of God."},
+  {c:"impact",r:"Galatians 6:2",t:"Carry each other\u2019s burdens, and so fulfil the law of Christ."},
+  {c:"impact",r:"2 Timothy 1:7",t:"For God gave us a spirit not of fear, but of power, love, and self-control."},
+  {c:"impact",r:"Joshua 1:9",t:"Haven\u2019t I commanded you? Be strong and courageous. Don\u2019t be afraid. Don\u2019t be discouraged, for the LORD your God is with you wherever you go."},
+  {c:"impact",r:"Philippians 1:6",t:"Being confident of this very thing, that he who began a good work in you will carry it on to completion until the day of Christ Jesus."},
+  {c:"impact",r:"Esther 4:14",t:"...Who knows whether you have come to the kingdom for such a time as this?"},
+  {c:"impact",r:"Matthew 5:6",t:"Blessed are those who hunger and thirst for righteousness, for they shall be filled."},
+  {c:"impact",r:"Romans 10:14",t:"How then can they call on the one they have not believed in? And how can they believe in the one of whom they have not heard? And how can they hear without someone preaching to them?"},
+  {c:"impact",r:"1 Corinthians 15:58",t:"Therefore, my beloved brothers and sisters, be steadfast, immovable, always excelling in the Lord\u2019s work, because you know that your labour is not in vain in the Lord."},
+  {c:"impact",r:"Ephesians 3:20",t:"Now to him who is able to do far more abundantly than all we ask or think, according to the power that works within us."},
+  {c:"impact",r:"Micah 6:8",t:"...what does the LORD require of you, but to act justly, to love mercy, and to walk humbly with your God?"},
+  {c:"impact",r:"Colossians 4:6",t:"Let your speech always be gracious, seasoned with salt, so that you may know how to answer everyone."},
+  {c:"impact",r:"Revelation 21:5",t:"...Behold, I am making all things new..."}
+];
+
+const CAT_INFO = {
+  love:   {label:"Aroha \u00b7 Love",   chip:"var(--love-soft)"},
+  know:   {label:"M\u014dhio \u00b7 Know",   chip:"var(--know-soft)"},
+  serve:  {label:"Manaaki \u00b7 Serve", chip:"var(--serve-soft)"},
+  impact: {label:"P\u0101nga \u00b7 Impact",chip:"var(--impact-soft)"}
+};
+
+VERSES.forEach((v,i)=>v.n=i+1);
+
+/* ======================= STATE ======================= */
+let currentCat = "all";
+let currentIndex = 0; // index into filteredList
+let filteredList = VERSES.slice();
+
+/* ======================= ELEMENTS ======================= */
+const coverScreen = document.getElementById('cover');
+const appScreen = document.getElementById('app');
+const swordGroup = document.getElementById('swordGroup');
+const backBtn = document.getElementById('backBtn');
+const tabs = document.querySelectorAll('.tab');
+const select = document.getElementById('verseSelect');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const verseText = document.getElementById('verseText');
+const verseReference = document.getElementById('verseReference');
+const verseNumber = document.getElementById('verseNumber');
+const catChip = document.getElementById('catChip');
+const verseCard = document.getElementById('verseCard');
+
+/* ======================= NAVIGATION ======================= */
+swordGroup.addEventListener('click', ()=>{
+  coverScreen.style.display='none';
+  appScreen.style.display='flex';
+  buildSelect();
+  showVerse(0);
+});
+backBtn.addEventListener('click', ()=>{
+  appScreen.style.display='none';
+  coverScreen.style.display='flex';
+});
+
+tabs.forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    tabs.forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentCat = tab.dataset.cat;
+    filteredList = currentCat==="all" ? VERSES.slice() : VERSES.filter(v=>v.c===currentCat);
+    buildSelect();
+    showVerse(0);
+  });
+});
+
+function buildSelect(){
+  select.innerHTML = "";
+  filteredList.forEach((v,i)=>{
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = "#"+v.n+" \u2014 "+v.r;
+    select.appendChild(opt);
+  });
+}
+
+select.addEventListener('change', ()=> showVerse(parseInt(select.value,10)) );
+prevBtn.addEventListener('click', ()=> showVerse((currentIndex-1+filteredList.length)%filteredList.length) );
+nextBtn.addEventListener('click', ()=> showVerse((currentIndex+1)%filteredList.length) );
+
+function showVerse(i){
+  currentIndex = i;
+  const v = filteredList[i];
+  select.value = i;
+  verseCard.style.animation='none';
+  void verseCard.offsetWidth;
+  verseCard.style.animation='cardIn .35s ease';
+  verseText.textContent = "\u201C"+v.t+"\u201D";
+  verseReference.textContent = v.r;
+  verseNumber.textContent = "Verse "+v.n+" of 100";
+  const info = CAT_INFO[v.c];
+  catChip.textContent = info.label;
+  catChip.style.background = "var(--"+v.c+"-soft)";
+}
+
+document.addEventListener('keydown', (e)=>{
+  if(appScreen.style.display!=='flex') return;
+  if(e.key==='ArrowRight') nextBtn.click();
+  if(e.key==='ArrowLeft') prevBtn.click();
+});
+</script>
+</body>
+</html>
