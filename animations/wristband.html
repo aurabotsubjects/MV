@@ -1,0 +1,98 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Memory Verse Wristbands</title>
+<style>
+:root{--paper:#f7f5f0;--ink:#111;--gold:#c98200}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Times New Roman',serif}
+#bar{max-width:1100px;margin:0 auto;padding:16px 20px;display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center}
+#bar h1{font-size:22px;font-style:italic;margin:0;flex:1 1 100%}
+#bar .ref{font-weight:700;color:var(--gold)}
+a.back{color:var(--ink);text-decoration:none;background:rgba(17,17,17,.08);border-radius:99px;padding:7px 16px;font-size:15px}
+.cnt{display:flex;align-items:center;gap:8px;font-size:16px}
+.cnt button{width:38px;height:38px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);font-size:20px;cursor:pointer}
+.cnt input{width:64px;font:700 18px Georgia,serif;text-align:center;border:2px solid var(--ink);border-radius:10px;padding:6px;background:#fff}
+#print{font:700 17px Georgia,serif;background:var(--ink);color:var(--paper);border:0;border-radius:99px;padding:11px 26px;cursor:pointer}
+#print:hover{background:#333}
+#info{flex:1 1 100%;font-size:14px;color:#444;line-height:1.5}
+#sheet{display:flex;flex-direction:column;gap:3mm;padding:0 20px 40px;align-items:flex-start;max-width:100%;overflow-x:auto}
+.strip{height:15mm;display:flex;align-items:center;flex:none;border:.3mm dashed #666;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;break-inside:avoid;page-break-inside:avoid;position:relative}
+.main{flex:1;display:flex;align-items:center;gap:2.2mm;padding:0 2.2mm;min-width:0;height:100%}
+.sym{width:11mm;height:11mm;flex:none}
+.sym svg{width:100%;height:100%;display:block;overflow:visible}
+.letters{flex:1;display:flex;justify-content:space-between;align-items:center;white-space:nowrap;font-weight:700;line-height:1}
+.letters span{display:inline-block}
+.refb{flex:none;font-weight:700;color:var(--gold);white-space:nowrap;font-style:italic;border-left:.3mm solid #bbb;border-right:.3mm solid #bbb;padding:0 2mm}
+.tab{flex:none;width:12mm;height:100%;border-left:.3mm dashed #666;background:repeating-linear-gradient(135deg,#ece9e1 0 1.2mm,#fff 1.2mm 2.4mm);display:flex;align-items:center;justify-content:center;font-size:2.2mm;color:#777;letter-spacing:.1mm;writing-mode:vertical-rl;text-orientation:mixed;transform:none}
+@media print{
+  #bar{display:none}
+  html,body{background:#fff}
+  #sheet{padding:0;overflow:visible;display:block}
+  .strip{margin:0 0 3mm 0}
+}
+</style></head><body>
+<div id="bar">
+  <h1>Memory verse wristbands <span class="ref" id="vr"></span></h1>
+  <a class="back" id="back" href="../index.html">← Back to the verse</a>
+  <div class="cnt"><label for="n">How many wristbands?</label><button id="mi" aria-label="fewer">−</button><input id="n" type="number" min="1" max="200" value="10"><button id="pl" aria-label="more">+</button></div>
+  <button id="print">🖨 Print</button>
+  <div id="info"></div>
+</div>
+<div id="sheet"></div>
+<script src="motifs.js"></script>
+<script>MV.V=function(n,s){MV.specs[n]=s};MV.I=function(m,x,y,s,a0,a1,o){return Object.assign({m:m,x:x,y:y,s:s||1,a:[a0,a1]},o||{})};MV.T=function(str,x,y,size,a0,a1,o){return Object.assign({m:"txt",str:str,x:x,y:y,size:size,a:[a0,a1]},o||{})};</script>
+<script src="spec-love.js"></script><script src="spec-know.js"></script><script src="spec-serve.js"></script><script src="spec-impact.js"></script>
+<script>
+(function(){
+const MV=window.MV,M=MV.M,V=+new URLSearchParams(location.search).get('v')||1;
+const COL={red:'#d6283a',gold:'#f2a900',gold2:'#c98200',blue:'#4a7fb5',green:'#2e9d62',purple:'#8a55c9',orange:'#ee7a1f',sky:'#8cc4e8',brown:'#8a5a2b',grey:'#e2e2e2',cream:'#fff3cf',pink:'#f4a6b5',white:'#ffffff'};
+const col=(c,acc)=>!c?'#111':c==='a'?(COL[acc]||acc||COL.red):(COL[c]||c);
+/* verse 12 (John 15:13) was hand-made, so it has no spec here */
+if(!MV.specs[12])MV.specs[12]={r:'John 15:13',end:['heart','red'],sc:[[0,8,[{m:'fig',c:'red',k:{}}]]],pg:[[0,1,['Greater love has no one than this, that someone lay down his life for his friends.']]]};
+const spec=MV.specs[V]||MV.specs[1];
+const ABBR={'Genesis':'Gen','Exodus':'Exod','Deuteronomy':'Deut','Joshua':'Josh','Esther':'Esth','Psalm':'Ps','Proverbs':'Prov','Isaiah':'Isa','Jeremiah':'Jer','Micah':'Mic','Zephaniah':'Zeph','Matthew':'Matt','Mark':'Mk','Luke':'Lk','John':'Jn','Acts':'Acts','Romans':'Rom','Galatians':'Gal','Ephesians':'Eph','Philippians':'Phil','Colossians':'Col','Hebrews':'Heb','James':'Jas','Revelation':'Rev','Corinthians':'Cor','Timothy':'Tim','Peter':'Pet'};
+function abbr(r){const m=/^((?:[123]\s)?[A-Za-z]+)\s+(.+)$/.exec(r);if(!m)return r;const b=m[1].split(' '),n=b.length>1?b[0]+' ':'',name=b[b.length-1];return n+(ABBR[name]||name.slice(0,4))+' '+m[2].replace(/[–—]/g,'-')}
+const text=spec.pg.flatMap(p=>p[2]).join(' ').replace(/\s+/g,' ').trim();
+const words=text.split(' ').filter(Boolean);
+const letters=words.map(w=>{const m=/^([^A-Za-z0-9]*)([A-Za-z0-9])(.*)$/.exec(w);if(!m)return w;const tail=m[3].replace(/[A-Za-z0-9'’]/g,'');return m[1]+m[2]+tail});
+const ref=abbr(spec.r);
+/* symbols: start = what the verse is about (first scene's main picture), end = the closing picture */
+const SKIP=new Set(['ground','line','hill','cloud','rays','road','scroll','spark','star','sun','moon']);
+const fin=v=>Array.isArray(v)&&v.length===4&&v.every(x=>typeof x==='number')?v[1]:v;
+const cands=[];(spec.sc||[]).forEach(sc=>sc[2].forEach(it=>{if(it.m&&!it.m.startsWith('fx')&&it.m!=='txt'&&M[it.m]&&!SKIP.has(it.m))cands.push([it.m,it.c,it.k])}));
+const em=spec.end||['heart','red'];const endSym=[em[0],em[1],em[3]];
+let startSym=cands.find(c=>c[0]!==endSym[0])||cands[0]||['star','gold'];
+if(startSym[0]===endSym[0]&&em[0]!=='heart')startSym=['heart','red'];
+function sym(m,c,k){let r;try{const kk={};for(const q in (k||{}))kk[q]=fin(k[q]);r=M[m](kk,10,{c})}catch(e){try{r=M.star({},10,{})}catch(e2){return''}}
+  const st=(r[0]||[]).filter(p=>p&&p.length>1),fl=r[1]||[];let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  st.forEach(p=>p.forEach(q=>{x0=Math.min(x0,q[0]);x1=Math.max(x1,q[0]);y0=Math.min(y0,q[1]);y1=Math.max(y1,q[1])}));
+  if(x0>x1)return'';const pad=8,w=x1-x0+2*pad,h=y1-y0+2*pad,s=Math.max(w,h),ox=x0-pad-(s-w)/2,oy=y0-pad-(s-h)/2;
+  let o=`<svg viewBox="${ox} ${oy} ${s} ${s}" xmlns="http://www.w3.org/2000/svg">`;
+  fl.forEach(f=>{o+=`<polygon points="${f.p.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' ')}" fill="${col(f.c,c)}" fill-opacity="${Math.min(1,f.a)}" stroke="none"/>`});
+  st.forEach(p=>{o+=`<polyline points="${p.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' ')}" fill="none" stroke="${col(p.c,c)}" stroke-width="${(1.6*(p.w||1)).toFixed(2)}" stroke-opacity="${p.al??1}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" style="stroke-width:${Math.max(1.1,1.5*(p.w||1))}px"/>`});
+  return o+'</svg>'}
+const sheet=document.getElementById('sheet');
+const symS=sym(...startSym),symE=sym(...endSym);
+function build(){const strip=document.createElement('div');strip.className='strip';
+  strip.innerHTML=`<div class="main"><div class="sym">${symS}</div><div class="letters">${letters.map(l=>`<span>${l.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</span>`).join('')}</div><div class="refb">${ref}</div><div class="sym">${symE}</div></div><div class="tab">glue / tape</div>`;return strip}
+const mm=px=>px/3.7795;
+function fit(){/* pick the biggest letter size that keeps the strip within a landscape A4 line (277mm), at least 190mm long */
+  sheet.innerHTML='';const s=build();sheet.appendChild(s);const lt=s.querySelector('.letters'),rf=s.querySelector('.refb'),tab=s.querySelector('.tab');
+  let F=8.5,total=0;
+  for(;F>=4.5;F-=.25){s.style.width='auto';s.style.fontSize=F+'mm';lt.style.flex='none';lt.style.gap=(F*.28)+'mm';rf.style.fontSize=(F*.5)+'mm';
+    total=mm(s.getBoundingClientRect().width);if(total<=277)break}
+  lt.style.flex='1';lt.style.gap='0';const L=Math.max(190,Math.ceil(total));return{F,L,natural:total}}
+let fitInfo;
+function render(){const n=Math.max(1,Math.min(200,parseInt(document.getElementById('n').value)||1));document.getElementById('n').value=n;
+  fitInfo=fitInfo||fit();const{F,L}=fitInfo;sheet.innerHTML='';
+  for(let i=0;i<n;i++){const s=build();s.style.width=L+'mm';s.style.fontSize=F+'mm';s.querySelector('.refb').style.fontSize=(F*.5)+'mm';sheet.appendChild(s)}
+  const land=L>190;let st=document.getElementById('pgst');if(!st){st=document.createElement('style');st.id='pgst';document.head.appendChild(st)}
+  st.textContent=`@page{size:A4 ${land?'landscape':'portrait'};margin:10mm}`;
+  const per=land?10:15;document.getElementById('info').textContent=`Each strip is 15 mm high and ${L} mm long (including the glue tab). This page prints ${per} per A4 sheet (${land?'landscape':'portrait'}) – ${n} wristband${n>1?'s':''} = ${Math.ceil(n/per)} sheet${Math.ceil(n/per)>1?'s':''}. Cut along the dashed lines, wrap round a wrist, and glue or tape the shaded tab over the other end. In the print box set Scale to 100% and untick “Headers and footers”.`}
+document.getElementById('vr').textContent='· '+spec.r;
+document.getElementById('back').href='../index.html#verse='+V;
+const ni=document.getElementById('n');
+document.getElementById('mi').onclick=()=>{ni.value=Math.max(1,(+ni.value||1)-1);render()};
+document.getElementById('pl').onclick=()=>{ni.value=Math.min(200,(+ni.value||1)+1);render()};
+ni.oninput=render;document.getElementById('print').onclick=()=>{render();window.print()};
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(render,render);
+})();
+</script></body></html>
