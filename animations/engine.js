@@ -139,7 +139,7 @@ MV.boot=function(){
   const q=new URLSearchParams(location.search),n=q.get('v')==='intro'?'intro':(+q.get('v')||1),dbg=q.get('t'),spec=MV.specs[n],embed=q.get('embed')==='1';DUR=spec&&spec.dur||30;const EN=spec&&spec.noend?DUR+10:24;
   const cv=document.getElementById('c');ctx=cv.getContext('2d');
   const ov=document.getElementById('ov'),go=document.getElementById('go'),again=document.getElementById('again'),mute=document.getElementById('mute'),back=document.getElementById('back');
-  back.href='../index.html#verse='+n;const enter=document.getElementById('enter');if(n==='intro'){back.style.display='none'}if(enter){enter.style.display=n==='intro'?'block':'none';enter.onclick=()=>{if(spec.gate&&!gateOn){running=false;startGate()}else goEnter()}}
+  back.href='../index.html#verse='+n;const enter=document.getElementById('enter');if(n==='intro'){back.style.display='none'}if(enter){enter.style.display=n==='intro'?'block':'none';enter.onclick=()=>{if(spec.gate&&!gateOn){running=false;cues.forEach(c=>c.d=1);startGate()}else goEnter()}}
   if(!spec){document.getElementById('ottl').textContent='Animation coming soon';go.style.display='none';return}
   document.title=spec.r+' – Memory Verse';
   const words=spec.pg[0][2][0].replace(/[“”"]/g,'').split(' ').slice(0,4).join(' ');
@@ -177,7 +177,7 @@ MV.boot=function(){
   MV.gate=(g,c)=>{ov.style.display='none';gateFrame(g,c)};
   function gloop(now){if(!gateOn)return;const g=(now-gT0)/1000;gateFrame(g,ct);
     if(ct!=null&&g>=ct+4.9){gateOn=false;goEnter();return}requestAnimationFrame(gloop)}
-  function startGate(){gateOn=true;ct=null;gT0=performance.now();if(enter)enter.style.display='none';again.style.display='block';mute.style.display=AC?'block':'none';cv.style.cursor='default';requestAnimationFrame(gloop)}
+  function startGate(){try{if(!AC)initAudio();AC.resume()}catch(x){}ov.style.display='none';gateOn=true;ct=null;gT0=performance.now();if(enter)enter.style.display='none';again.style.display='block';mute.style.display=AC?'block':'none';cv.style.cursor='default';requestAnimationFrame(gloop)}
   const sw=(e)=>{const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*W,y=(e.clientY-r.top)/r.height*H;return x>520&&x<760&&y>50&&y<520};
   function swordClick(){if(!gateOn||ct!=null)return;ct=(performance.now()-gT0)/1000;cv.style.cursor='default';again.style.display='none';
     const q=(ms,f)=>setTimeout(()=>{try{if(AC)f()}catch(x){}},ms);q(0,()=>SF.zap());q(300,()=>SF.swell(2.6));q(2400,()=>SF.creak());q(3300,()=>SF.sparkle());q(3500,()=>SF.chime('G5'))}
