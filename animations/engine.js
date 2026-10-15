@@ -2,7 +2,7 @@
 (function(){
 'use strict';
 const MV=window.MV,M=MV.M,GR=MV.GR,G=MV.g;
-const W=1280,H=720,DUR=30,BG='#f7f5f0',INK='#111',P=Math.PI;
+let DUR=30;const W=1280,H=720,BG='#f7f5f0',INK='#111',P=Math.PI;
 const COL={red:'#d6283a',gold:'#f2a900',gold2:'#c98200',blue:'#4a7fb5',green:'#2e9d62',purple:'#8a55c9',orange:'#ee7a1f',sky:'#8cc4e8',brown:'#8a5a2b',grey:'#e2e2e2',cream:'#fff3cf',pink:'#f4a6b5',white:'#ffffff',bg:BG,ink:INK};
 const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),ease=x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2,seg=(t,a,b)=>clamp((t-a)/(b-a)),lerp=(a,b,k)=>a+(b-a)*k;
 const pulse=t=>t<.5?0:Math.exp(-(((t-.5)%1))*7);
@@ -129,37 +129,37 @@ const SF={
 let cues=[];
 function buildCues(spec){cues=[];const key=spec.key||'C',minor=spec.mood==='minor',k=NOTE[key[0]]+(key[1]==='#'?1:key[1]==='b'?-1:0),nm=o=>NAMES[(k+o+12)%12];
   const prog=spec.prog||(minor?[nm(0)+'m',nm(8),nm(5)+'m',nm(7),nm(0)]:[nm(0),nm(9)+'m',nm(5),nm(7),nm(0)]);
-  [.2,6.2,12.2,18.2].forEach((t,i)=>cues.push({t,f:()=>SF.pad(prog[i],7.5,.032)}));
-  const last=CH(prog[4]);cues.push({t:24.3,f:()=>SF.pad(prog[4],6,.05)});[[24.6,last[2]],[25.4,last[3]],[26.2,last[4]],[27,last[2]*2]].forEach(([t,f])=>cues.push({t,f:()=>SF.chime(f)}));
-  cues.push({t:27.8,f:()=>{SF.chime(last[2],.2);SF.chime(last[4],.15)}});
+  (spec.noend?[.2,4,8,11.5]:[.2,6.2,12.2,18.2]).forEach((t,i)=>cues.push({t,f:()=>SF.pad(prog[i],spec.noend?5:7.5,.032)}));
+  if(!spec.noend){const last=CH(prog[4]);cues.push({t:24.3,f:()=>SF.pad(prog[4],6,.05)});[[24.6,last[2]],[25.4,last[3]],[26.2,last[4]],[27,last[2]*2]].forEach(([t,f])=>cues.push({t,f:()=>SF.chime(f)}));
+  cues.push({t:27.8,f:()=>{SF.chime(last[2],.2);SF.chime(last[4],.15)}})}
   (spec.sn||[]).forEach(([t,nameRaw,...args])=>{const[name,rep,gap]=nameRaw.split(':'),fn=SF[name];if(!fn)return;const n=rep?+rep:1,g=gap?+gap:1;for(let i=0;i<n;i++)cues.push({t:t+i*g,f:()=>fn(...args)})})}
 
 /* ---------- boot ---------- */
 MV.boot=function(){
-  const q=new URLSearchParams(location.search),n=+q.get('v')||1,dbg=q.get('t'),spec=MV.specs[n];
+  const q=new URLSearchParams(location.search),n=q.get('v')==='intro'?'intro':(+q.get('v')||1),dbg=q.get('t'),spec=MV.specs[n],embed=q.get('embed')==='1';DUR=spec&&spec.dur||30;const EN=spec&&spec.noend?DUR+10:24;
   const cv=document.getElementById('c');ctx=cv.getContext('2d');
   const ov=document.getElementById('ov'),go=document.getElementById('go'),again=document.getElementById('again'),mute=document.getElementById('mute'),back=document.getElementById('back');
-  back.href='../index.html#verse='+n;
+  back.href='../index.html#verse='+n;const enter=document.getElementById('enter');if(n==='intro'){back.style.display='none'}if(enter){enter.style.display=n==='intro'?'block':'none';enter.onclick=()=>{if(window.parent!==window)window.parent.postMessage('mv-enter','*');else location.href='../index.html#verse=1'}}
   if(!spec){document.getElementById('ottl').textContent='Animation coming soon';go.style.display='none';return}
   document.title=spec.r+' – Memory Verse';
   const words=spec.pg[0][2][0].replace(/[“”"]/g,'').split(' ').slice(0,4).join(' ');
-  document.getElementById('ottl').textContent='“'+words+'…”';document.getElementById('oref').textContent=spec.r+' · a 30-second memory verse';
+  if(n==='intro'){document.getElementById('ottl').textContent='The Armor of God';document.getElementById('oref').textContent=spec.r}else{document.getElementById('ottl').textContent='“'+words+'…”';document.getElementById('oref').textContent=spec.r+' · a 30-second memory verse'}
   /* flatten scenes */
   const items=[];(spec.sc||[]).forEach(([a,b,list])=>list.forEach(it=>{if(!it.o&&!it.keep)it.o=[b-.7,b];items.push(it)}));
   let pages,E;const prep=()=>{pages=layoutPages(spec);E=layoutEnd(spec)};
   function render(t){ctx.setTransform(1.5,0,0,1.5,0,0);ctx.fillStyle=BG;ctx.fillRect(0,0,W,H);textDrawing=false;
-    ctx.save();if(t>23.2)ctx.globalAlpha=1-seg(t,23.2,24);
-    if(t<24){items.forEach(it=>drawItem(it,t));
+    ctx.save();if(t>EN-.8)ctx.globalAlpha=1-seg(t,EN-.8,EN);
+    if(t<EN){items.forEach(it=>drawItem(it,t));
       pages.forEach(pg=>{if(t<pg.s||t>pg.e+.55)return;ctx.save();ctx.globalAlpha*=1-seg(t,pg.e,pg.e+.5);pg.L.forEach(l=>writeLine(l.str,W/2,l.y,l.size,seg(t,l.t0,l.t1),seg(t,l.t1-.1,l.t1+.8),pg.hl));ctx.restore()})}
     ctx.restore();
-    if(t>=24)drawEnd(spec,E,t-24);
+    if(t>=EN)drawEnd(spec,E,t-EN);
     ctx.fillStyle='rgba(17,17,17,.25)';ctx.fillRect(0,H-3,W*t/DUR,3);
     if(AC)scratch.gain.setTargetAtTime(textDrawing?.03:0,AC.currentTime,.05)}
   let t0=0,running=false;
   function start(){try{if(!AC)initAudio();AC.resume();rainGain.gain.cancelScheduledValues(0);rainGain.gain.value=0;windGain.gain.cancelScheduledValues(0);windGain.gain.value=0}catch(e){}
-    buildCues(spec);ov.style.display='none';again.style.display='none';mute.style.display=AC?'block':'none';t0=performance.now();running=true;requestAnimationFrame(loop)}
+    if(enter){enter.textContent='Skip ▶';enter.classList.remove('big')}buildCues(spec);ov.style.display='none';again.style.display='none';mute.style.display=AC?'block':'none';t0=performance.now();running=true;requestAnimationFrame(loop)}
   function loop(now){if(!running)return;const t=(now-t0)/1000;cues.forEach(c=>{if(!c.d&&t>=c.t){c.d=1;try{if(AC)c.f()}catch(e){}}});render(Math.min(t,DUR));
-    if(t>=DUR){running=false;again.style.display='block';mute.style.display='none';return}requestAnimationFrame(loop)}
+    if(t>=DUR){running=false;again.style.display='block';mute.style.display='none';if(enter){enter.textContent='Start the verses ▶';enter.classList.add('big')}return}requestAnimationFrame(loop)}
   go.onclick=again.onclick=start;
   mute.onclick=()=>{const m=master.gain.value>0;master.gain.value=m?0:.8;mute.textContent=m?'🔇':'🔊'};
   const ready=()=>{prep();if(dbg!==null){ov.style.display='none';render(+dbg)}else render(0)};
