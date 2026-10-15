@@ -74,12 +74,12 @@ const symS=sym(...startSym),symE=sym(...endSym);
 function build(){const strip=document.createElement('div');strip.className='strip';
   strip.innerHTML=`<div class="main"><div class="sym">${symS}</div><div class="letters">${letters.map(l=>`<span>${l.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</span>`).join('')}</div><div class="refb">${ref}</div><div class="sym">${symE}</div></div><div class="tab">glue / tape</div>`;return strip}
 const mm=px=>px/3.7795;
-function fit(){/* pick the biggest letter size that keeps the strip up to 222mm long, at least 152mm long */
+function fit(){/* pick the biggest letter size that keeps the strip exactly 210mm long */
   sheet.innerHTML='';const s=build();sheet.appendChild(s);const lt=s.querySelector('.letters'),rf=s.querySelector('.refb'),tab=s.querySelector('.tab');
   let F=8.5,total=0;
-  for(;F>=3;F-=.25){s.style.width='auto';s.style.fontSize=F+'mm';lt.style.flex='none';lt.style.gap=(F*.28)+'mm';rf.style.fontSize=(F*.5)+'mm';
-    total=mm(s.getBoundingClientRect().width);if(total<=222)break}
-  lt.style.flex='1';lt.style.gap='0';const L=Math.max(152,Math.ceil(total));return{F,L,natural:total}}
+  for(;F>=2.4;F-=.25){s.style.width='auto';s.style.fontSize=F+'mm';lt.style.flex='none';lt.style.gap=(F*.28)+'mm';rf.style.fontSize=(F*.5)+'mm';
+    total=mm(s.getBoundingClientRect().width);if(total<=210)break}
+  lt.style.flex='1';lt.style.gap='0';const L=210;return{F,L,natural:total}}
 let fitInfo;
 function render(){const n=Math.max(1,Math.min(200,parseInt(document.getElementById('n').value)||1));document.getElementById('n').value=n;
   fitInfo=fitInfo||fit();const{F,L}=fitInfo;sheet.innerHTML='';
