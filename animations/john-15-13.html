@@ -1,0 +1,122 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>John 15:13 – Memory Verse</title>
+<style>
+:root{--page:#e9e6df;--ink:#111;--paper:#f7f5f0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#161616}}
+:root[data-theme="dark"]{--page:#161616}
+html,body{height:100%;margin:0}body{background:var(--page);display:flex;align-items:center;justify-content:center;font-family:Georgia,'Times New Roman',serif}
+#stage{position:relative;aspect-ratio:16/9;width:min(100%,calc(100dvh*16/9));background:var(--paper);overflow:hidden}
+canvas{width:100%;height:100%;display:block}
+#ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--paper);color:var(--ink)}
+#ov h1{font-style:italic;font-size:clamp(20px,4vw,48px);margin:0 0 .3em}#ov p{margin:0 0 1.2em;opacity:.7;font-size:clamp(12px,1.6vw,18px)}
+button{font:inherit;background:#111;color:#f7f5f0;border:0;border-radius:99px;padding:.6em 1.4em;cursor:pointer;font-size:clamp(13px,1.8vw,20px)}
+#again{position:absolute;right:2%;top:3%;display:none}#mute{position:absolute;right:2%;top:3%;display:none;padding:.4em .8em}
+</style></head><body><a href="../index.html#verse=12" style="position:fixed;top:10px;left:12px;z-index:99999;font:700 14px system-ui,sans-serif;color:#fff;background:rgba(0,0,0,.55);padding:6px 12px;border-radius:999px;text-decoration:none">&larr; Verses</a>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas>
+<div id="ov"><div><h1>“Greater love…”</h1><p>John 15:13 · a 30-second memory verse</p><button id="go">▶ Play with sound</button></div></div>
+<button id="mute">🔊</button><button id="again">↻ Replay</button></div>
+<script>
+const W=1280,H=720,DUR=30,BG='#f7f5f0',INK='#111',RED='#d6283a',GOLD='#f2a900',GOLD2='#c98200',BLUE='#4a7fb5';
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),ease=x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2,seg=(t,a,b)=>clamp((t-a)/(b-a)),lerp=(a,b,k)=>a+(b-a)*k;
+const pulse=t=>t<.5?0:Math.exp(-(((t-.5)%1))*7);
+/* ---------- drawing helpers ---------- */
+const plen=p=>{let L=0;for(let i=1;i<p.length;i++)L+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);return L};
+function drawSet(set,p,col=INK,lw=4){if(p<=0)return;ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.lineCap=ctx.lineJoin='round';
+ const ls=set.map(plen);let rem=p*ls.reduce((a,b)=>a+b,0);
+ for(let k=0;k<set.length&&rem>0;k++){const P=set[k];ctx.beginPath();ctx.moveTo(P[0][0],P[0][1]);let r=rem;
+  for(let i=1;i<P.length;i++){const d=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);
+   if(r>=d){ctx.lineTo(P[i][0],P[i][1]);r-=d}else{const f=r/d;ctx.lineTo(lerp(P[i-1][0],P[i][0],f),lerp(P[i-1][1],P[i][1],f));break}}
+  ctx.stroke();rem-=ls[k]}}
+function fillPts(P,col,a){if(a<=0)return;ctx.save();ctx.globalAlpha*=a;ctx.fillStyle=col;ctx.beginPath();P.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath();ctx.fill();ctx.restore()}
+const circ=(cx,cy,r,n,s=0)=>Array.from({length:n+1},(_,i)=>[cx+r*Math.cos(s+6.2832*i/n),cy+r*Math.sin(s+6.2832*i/n)]);
+const heart=(cx,cy,s)=>Array.from({length:101},(_,i)=>{const t=6.2832*i/100;return[cx+s*16*Math.pow(Math.sin(t),3),cy-s*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))]});
+function fig(x,y,s,a){const sy=y-4.2*s,hy=y-2.6*s,L=2.2*s,th=-1.3+1.65*a,ex=L*Math.cos(th),ey=L*Math.sin(th);
+ return[circ(x,y-5.4*s,.85*s,22,-1.57),[[x,y-4.55*s],[x,hy]],[[x-1.1*s,y],[x,hy],[x+1.1*s,y]],[[x-ex,sy-ey],[x,sy],[x+ex,sy-ey]]]}
+function cloud(cx,cy,w,h){const n=70,P=[];for(let i=0;i<=n;i++){const u=i/n;P.push([cx-w/2+u*w,cy-h*Math.sin(Math.PI*u)*(.45+.55*Math.abs(Math.sin(u*Math.PI*3.5)))])}
+ for(let i=n;i>=0;i--){const u=i/n;P.push([cx-w/2+u*w,cy+10*Math.sin(Math.PI*u)])}return P}
+let textDrawing=false;
+function writeLine(str,cx,y,size,p,fp,hl={}){if(p<=0)return;ctx.font=`italic 700 ${size}px Georgia,'Times New Roman',serif`;ctx.textBaseline='alphabetic';
+ const w=ctx.measureText(str).width,left=cx-w/2,n=str.length,L=size*10;if(p<1)textDrawing=true;
+ const col=[];let pos=0;str.split(' ').forEach(wd=>{const c=hl[wd.replace(/[,.“”]/g,'')]||INK;for(let k=0;k<wd.length;k++)col[pos+k]=c;pos+=wd.length+1});
+ for(let i=0;i<n;i++){const ch=str[i];if(ch===' ')continue;const x=left+ctx.measureText(str.slice(0,i)).width,pi=clamp((p-i/n*.75)/.25);if(pi<=0)continue;
+  ctx.save();ctx.setLineDash([L,L*2]);ctx.lineDashOffset=L*(1-pi);ctx.strokeStyle=col[i];ctx.lineWidth=Math.max(1.4,size/26);ctx.lineJoin='round';ctx.strokeText(ch,x,y);
+  ctx.setLineDash([]);if(fp>0){ctx.globalAlpha*=fp;ctx.fillStyle=col[i];ctx.fillText(ch,x,y)}ctx.restore()}}
+/* ---------- scenes ---------- */
+function sceneA(t){const cx=W/2,cy=270,pl=pulse(t),k=1+.05*pl;
+ ctx.save();ctx.translate(cx,cy+30);ctx.scale(k,k);ctx.translate(-cx,-cy-30);
+ const h=heart(cx,cy,11);fillPts(h,RED,seg(t,3.4,4.6)*.92);drawSet([h],ease(seg(t,.3,3.5)),INK,5);
+ const ra=pl*seg(t,3.5,4.5);if(ra>0){ctx.save();ctx.globalAlpha*=ra;for(let i=0;i<14;i++){const a=6.2832*i/14,c=Math.cos(a),s=Math.sin(a);drawSet([[[cx+c*250,cy+30+s*215],[cx+c*(285+30*pl),cy+30+s*(245+28*pl)]]],1,INK,4)}ctx.restore()}
+ ctx.restore();
+ writeLine('Greater love',W/2,H-85,80,seg(t,1.5,5),seg(t,4.2,5.2),{love:RED})}
+function sceneBC(t){const gy=540;
+ if(t>=10.8){ctx.fillStyle=`rgba(245,170,0,${.2*(1-seg(t,10.8,11.2))})`;ctx.fillRect(0,0,W,H)}
+ drawSet([[[40,gy],[W-40,gy]]],ease(seg(t,8.5,10.2)),INK,3);
+ const sa=1-seg(t,16,17.5);
+ if(sa>0){ctx.save();ctx.globalAlpha*=sa;
+  [[500,130,780,80],[950,105,420,55]].forEach((c,i)=>{const P=cloud(...c);fillPts(P,'#e2e2e2',seg(t,10,11)*.7);drawSet([P],ease(seg(t,8.2+i*.5,10.5+i*.4)),INK,4)});
+  const ra=seg(t,9.2,11)*(1-seg(t,14.8,17));
+  if(ra>0){ctx.save();ctx.strokeStyle=BLUE;ctx.lineWidth=2;ctx.globalAlpha*=.6;ctx.beginPath();
+   for(let i=0;i<110;i++){if(i/110>ra)break;const x=((i*7919)%1000)/1000*W,sp=700+((i*31)%13)*25,y=((((i*104729)%997)/997)*gy+t*sp)%gy;ctx.moveTo(x,y);ctx.lineTo(x-6,y+22)}ctx.stroke();ctx.restore()}
+  if(t>=10.8&&t<11.6&&((t*30)|0)%3!==2)drawSet([[[440,140],[480,260],[445,270],[505,400],[462,410],[530,520]]],1,GOLD,7);
+  ctx.restore()}
+ /* friends */
+ const cheer=.9*ease(seg(t,21,22.2));
+ drawSet(fig(800,gy,28,cheer),ease(seg(t,9.5,11.4)),INK,5);
+ [300,460,960].forEach((x,i)=>drawSet(fig(x,gy,28,cheer),ease(seg(t,17+i*.8,18.8+i*.8)),INK,5));
+ /* protector */
+ const px=lerp(420,640,ease(seg(t,12.8,14.4))),a=ease(seg(t,14.5,15.3));
+ drawSet(fig(px,gy,34,a),ease(seg(t,11,12.6)),INK,6);
+ const hk=ease(seg(t,15.2,15.9));if(hk>0)fillPts(heart(px,gy-3.5*34,1.5*hk*(1+.12*pulse(t))),RED,1);
+ /* rays of light */
+ for(let i=0;i<15;i++){const an=Math.PI*(.083+.834*i/14),c=Math.cos(an),s=Math.sin(an),r2=250+8*Math.sin(t*3+i),cy=gy-4.3*34;
+  drawSet([[[640+c*135,cy-s*135],[640+c*r2,cy-s*r2]]],ease(seg(t,16.2+i*.15,17+i*.15)),GOLD,5)}
+ /* text */
+ const f1=1-seg(t,15.2,16);if(f1>0){ctx.save();ctx.globalAlpha*=f1;writeLine('has no one than this,',W/2,H-80,68,seg(t,8.6,12),seg(t,11.2,12.4));ctx.restore()}
+ writeLine('that someone lay down his life',W/2,H-112,60,seg(t,16.2,19.6),seg(t,18.8,19.8),{life:RED});
+ writeLine('for his friends.',W/2,H-42,60,seg(t,19.6,22.4),seg(t,21.6,22.6),{friends:GOLD2})}
+function sceneD(u){const hy=x=>520-95*Math.exp(-Math.pow((x-640)/300,2));
+ const hill=Array.from({length:65},(_,i)=>[i*20,hy(i*20)]),sun=Array.from({length:61},(_,i)=>{const a=Math.PI+Math.PI*i/60;return[640+210*Math.cos(a),480+210*Math.sin(a)]});
+ fillPts(sun,GOLD,seg(u,3,4.2)*.3);drawSet([sun],ease(seg(u,1.6,3.4)),GOLD,7);
+ for(let i=0;i<13;i++){const an=Math.PI*(.06+.88*i/12),c=Math.cos(an),s=Math.sin(an),r2=295+8*Math.sin(u*3+i);drawSet([[[640+c*238,480-s*238],[640+c*r2,480-s*r2]]],ease(seg(u,3+i*.1,3.6+i*.1)),GOLD,5)}
+ fillPts([...hill,[W,H],[0,H]],BG,1);drawSet([hill],ease(seg(u,0,1.6)),INK,5);
+ drawSet([[[640,430],[640,300]],[[600,345],[680,345]]],ease(seg(u,1.4,3)),INK,9);
+ writeLine('John 15:13',640,612,60,seg(u,.6,3.2),seg(u,2.6,3.6),{'15:13':RED});
+ writeLine('“Greater love has no one than this, that someone lay down his life for his friends.”',640,672,27,seg(u,3.2,5.4),seg(u,5,5.9))}
+function render(t){ctx.setTransform(1.5,0,0,1.5,0,0);ctx.fillStyle=BG;ctx.fillRect(0,0,W,H);textDrawing=false;
+ if(t<8){ctx.save();ctx.globalAlpha=1-seg(t,7.3,8);sceneA(t);ctx.restore()}
+ else if(t<24){ctx.save();ctx.globalAlpha=1-seg(t,23.2,24);sceneBC(t);ctx.restore()}
+ else sceneD(t-24);
+ ctx.fillStyle='rgba(17,17,17,.25)';ctx.fillRect(0,H-3,W*t/DUR,3);
+ if(AC)scratch.gain.setTargetAtTime(textDrawing?.03:0,AC.currentTime,.05)}
+/* ---------- sound (Web Audio, all synthesised) ---------- */
+let AC,master,noiseBuf,rainGain,scratch;
+function initAudio(){AC=new(window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=.8;master.connect(AC.destination);
+ noiseBuf=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+ const loop=(type,f)=>{const s=AC.createBufferSource();s.buffer=noiseBuf;s.loop=true;const fl=AC.createBiquadFilter();fl.type=type;fl.frequency.value=f;const g=AC.createGain();g.gain.value=0;s.connect(fl);fl.connect(g);g.connect(master);s.start();return g};
+ rainGain=loop('highpass',2000);scratch=loop('bandpass',4000)}
+function tone(f,dur,v,type='sine',at=0,att=.01){const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+at;o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+att);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05)}
+function nz(dur,type,f1,f2,v,at=0){const s=AC.createBufferSource();s.buffer=noiseBuf;s.loop=true;const f=AC.createBiquadFilter(),g=AC.createGain(),t=AC.currentTime+at;f.type=type;f.frequency.setValueAtTime(f1,t);f.frequency.exponentialRampToValueAtTime(f2,t+dur);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+dur)}
+function thump(f,v,at=0){const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+at;o.frequency.setValueAtTime(f*2,t);o.frequency.exponentialRampToValueAtTime(f,t+.1);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+.4);o.connect(g);g.connect(master);o.start(t);o.stop(t+.45)}
+const beat=()=>{thump(80,1);nz(.06,'lowpass',500,200,.3);thump(65,.6,.24)};
+const chime=(f,v=.16)=>{tone(f,2.4,v);tone(f*2.01,1.5,v*.35);tone(f*3,.8,v*.2)};
+const pad=(fs,dur,v)=>fs.forEach(f=>{const o=AC.createOscillator(),g=AC.createGain(),l=AC.createBiquadFilter(),t=AC.currentTime;o.type='triangle';o.frequency.value=f;l.type='lowpass';l.frequency.value=900;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+2);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(l);l.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.1)});
+const thunder=()=>{nz(.12,'bandpass',1500,300,.7);nz(3.6,'lowpass',500,50,1.6);tone(46,3,.5)};
+const step=()=>{thump(95,.5);nz(.12,'lowpass',400,150,.4)};
+const whoosh=()=>nz(.9,'bandpass',400,2500,.25);
+const chirp=()=>{const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;o.frequency.setValueAtTime(3000+Math.random()*600,t);o.frequency.exponentialRampToValueAtTime(4300,t+.08);g.gain.setValueAtTime(.05,t);g.gain.exponentialRampToValueAtTime(.001,t+.1);o.connect(g);g.connect(master);o.start(t);o.stop(t+.12)};
+let cues=[],t0=0,running=false;
+function buildCues(){cues=[];const at=(t,f)=>cues.push({t,f});
+ for(let k=0;k<8;k++)at(.5+k,beat);for(let k=15;k<24;k++)at(.5+k,beat);
+ at(3.6,()=>chime(660));at(9.2,()=>rainGain.gain.setTargetAtTime(.12,AC.currentTime,.8));at(10.8,thunder);at(11.9,()=>nz(3,'lowpass',300,40,.7));
+ [13.1,13.6,14.1].forEach(x=>at(x,step));at(14.5,whoosh);at(15,()=>rainGain.gain.setTargetAtTime(0,AC.currentTime,1));at(15.2,()=>{chime(784);chime(1175,.1)});
+ at(16,()=>pad([130.8,196,261.6,329.6],8,.05));[1047,1175,1319,1568,1760,1568,2093].forEach((f,i)=>at(16.8+i*.6,()=>chime(f,.09)));
+ at(24.3,()=>pad([130.8,196,261.6,392,523.3],6,.05));[[24.6,523.3],[25.4,659.3],[26.2,784],[27,1046.5]].forEach(([x,f])=>at(x,()=>chime(f)));
+ at(27.8,()=>{chime(523.3,.2);chime(784,.15)});[25,25.15,25.3,26.6,26.75,27.9,28.05].forEach(x=>at(x,chirp))}
+const go=document.getElementById('go'),ov=document.getElementById('ov'),again=document.getElementById('again'),mute=document.getElementById('mute');
+function start(){if(!AC)initAudio();AC.resume();rainGain.gain.cancelScheduledValues(0);rainGain.gain.value=0;buildCues();ov.style.display='none';again.style.display='none';mute.style.display='block';t0=performance.now();running=true;requestAnimationFrame(loop)}
+function loop(now){if(!running)return;const t=(now-t0)/1000;cues.forEach(c=>{if(!c.d&&t>=c.t){c.d=1;try{c.f()}catch(e){}}});render(Math.min(t,DUR));
+ if(t>=DUR){running=false;again.style.display='block';mute.style.display='none';return}requestAnimationFrame(loop)}
+go.onclick=again.onclick=start;
+mute.onclick=()=>{const m=master.gain.value>0;master.gain.value=m?0:.8;mute.textContent=m?'🔇':'🔊'};
+render(0);
+</script></body></html>

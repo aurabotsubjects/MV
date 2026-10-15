@@ -307,6 +307,21 @@
     color:var(--gold-bright);
   }
 
+
+  .anim-btn{
+    margin-top:18px;
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:'Baloo 2',sans-serif;font-weight:800;
+    font-size:clamp(14px,2.2vw,18px);
+    padding:10px 22px;border-radius:999px;
+    background:linear-gradient(180deg,var(--gold-bright),var(--gold));
+    color:#1c1330;text-decoration:none;
+    box-shadow:0 6px 18px rgba(0,0,0,0.35);
+    border:2px solid rgba(255,255,255,0.5);
+    transition:.18s transform ease,.18s box-shadow ease;
+  }
+  .anim-btn:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 10px 24px rgba(0,0,0,0.45);}
+
   ::-webkit-scrollbar{width:8px;}
   ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.25);border-radius:10px;}
 
@@ -438,6 +453,7 @@
       <div class="verse-number" id="verseNumber">Verse 1 of 100</div>
       <div class="verse-text" id="verseText"></div>
       <div class="verse-reference" id="verseReference"></div>
+      <a class="anim-btn" id="animBtn" href="#">&#127916; See animated</a>
     </div>
   </div>
 </div>
@@ -597,6 +613,7 @@ const verseReference = document.getElementById('verseReference');
 const verseNumber = document.getElementById('verseNumber');
 const catChip = document.getElementById('catChip');
 const verseCard = document.getElementById('verseCard');
+const animBtn = document.getElementById('animBtn');
 
 /* ======================= NAVIGATION ======================= */
 swordGroup.addEventListener('click', ()=>{
@@ -648,7 +665,22 @@ function showVerse(i){
   const info = CAT_INFO[v.c];
   catChip.textContent = info.label;
   catChip.style.background = "var(--"+v.c+"-soft)";
+  /* animation link (John 15:13 is the hand-built original) */
+  animBtn.href = v.n===12 ? "animations/john-15-13.html" : "animations/play.html?v="+v.n;
+  try{ history.replaceState(null,'','#verse='+v.n); }catch(e){}
 }
+
+/* ======================= RETURN FROM ANIMATION (#verse=N) ======================= */
+(function(){
+  const m = /verse=(\d+)/.exec(location.hash);
+  if(!m) return;
+  const n = parseInt(m[1],10);
+  if(n<1 || n>VERSES.length) return;
+  coverScreen.style.display='none';
+  appScreen.style.display='flex';
+  buildSelect();
+  showVerse(n-1);
+})();
 
 document.addEventListener('keydown', (e)=>{
   if(appScreen.style.display!=='flex') return;

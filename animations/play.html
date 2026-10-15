@@ -1,0 +1,21 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Memory Verse</title>
+<style>
+:root{--page:#e9e6df;--ink:#111;--paper:#f7f5f0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#161616}}
+:root[data-theme="dark"]{--page:#161616}
+html,body{height:100%;margin:0}body{background:var(--page);display:flex;align-items:center;justify-content:center;font-family:Georgia,'Times New Roman',serif}
+#stage{position:relative;aspect-ratio:16/9;width:min(100%,calc(100dvh*16/9));background:var(--paper);overflow:hidden}
+canvas{width:100%;height:100%;display:block}
+#ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--paper);color:var(--ink)}
+#ov h1{font-style:italic;font-size:clamp(20px,4vw,48px);margin:0 0 .3em}#ov p{margin:0 0 1.2em;opacity:.7;font-size:clamp(12px,1.6vw,18px)}
+button{font:inherit;background:#111;color:#f7f5f0;border:0;border-radius:99px;padding:.6em 1.4em;cursor:pointer;font-size:clamp(13px,1.8vw,20px)}
+#again{position:absolute;right:2%;top:3%;display:none}#mute{position:absolute;right:2%;top:3%;display:none;padding:.4em .8em}
+#back{position:absolute;left:2%;top:3%;font:inherit;font-size:clamp(12px,1.5vw,17px);color:#111;text-decoration:none;background:rgba(17,17,17,.08);border-radius:99px;padding:.4em 1em;opacity:.75}
+#back:hover{opacity:1;background:rgba(17,17,17,.16)}
+</style></head><body>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas>
+<div id="ov"><div><h1 id="ottl">&nbsp;</h1><p id="oref"></p><button id="go">▶ Play with sound</button></div></div>
+<a id="back" href="../index.html">← Verses</a><button id="mute">🔊</button><button id="again">↻ Replay</button></div>
+<script src="motifs.js"></script><script src="engine.js"></script>
+<script src="spec-love.js"></script><script src="spec-know.js"></script><script src="spec-serve.js"></script><script src="spec-impact.js"></script>
+<script>MV.boot()</script></body></html>
