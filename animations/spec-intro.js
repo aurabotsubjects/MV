@@ -1,5 +1,5 @@
 (function(){const V=(n,o)=>MV.specs[n]=o,I=(m,x,y,s,a,b,o)=>Object.assign({m,x,y,s,a:[a,b]},o||{});
-V('intro',{r:'Ephesians 6:10–18',key:'D',dur:15,noend:true,
+V('intro',{r:'Ephesians 6:10–18',key:'D',dur:15,noend:true,gate:true,
  sc:[[0,15,[
   I('belt',150,300,1.0,.9,2.7,{c:'gold'}),
   I('breastplate',385,290,1.15,2.6,4.8,{c:'red'}),

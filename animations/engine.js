@@ -139,7 +139,7 @@ MV.boot=function(){
   const q=new URLSearchParams(location.search),n=q.get('v')==='intro'?'intro':(+q.get('v')||1),dbg=q.get('t'),spec=MV.specs[n],embed=q.get('embed')==='1';DUR=spec&&spec.dur||30;const EN=spec&&spec.noend?DUR+10:24;
   const cv=document.getElementById('c');ctx=cv.getContext('2d');
   const ov=document.getElementById('ov'),go=document.getElementById('go'),again=document.getElementById('again'),mute=document.getElementById('mute'),back=document.getElementById('back');
-  back.href='../index.html#verse='+n;const enter=document.getElementById('enter');if(n==='intro'){back.style.display='none'}if(enter){enter.style.display=n==='intro'?'block':'none';enter.onclick=()=>{if(window.parent!==window)window.parent.postMessage('mv-enter','*');else location.href='../index.html#verse=1'}}
+  back.href='../index.html#verse='+n;const enter=document.getElementById('enter');if(n==='intro'){back.style.display='none'}if(enter){enter.style.display=n==='intro'?'block':'none';enter.onclick=()=>{if(spec.gate&&!gateOn){running=false;startGate()}else goEnter()}}
   if(!spec){document.getElementById('ottl').textContent='Animation coming soon';go.style.display='none';return}
   document.title=spec.r+' – Memory Verse';
   const words=spec.pg[0][2][0].replace(/[“”"]/g,'').split(' ').slice(0,4).join(' ');
@@ -159,8 +159,32 @@ MV.boot=function(){
   function start(){try{if(!AC)initAudio();AC.resume();rainGain.gain.cancelScheduledValues(0);rainGain.gain.value=0;windGain.gain.cancelScheduledValues(0);windGain.gain.value=0}catch(e){}
     if(enter){enter.textContent='Skip ▶';enter.classList.remove('big')}buildCues(spec);ov.style.display='none';again.style.display='none';mute.style.display=AC?'block':'none';t0=performance.now();running=true;requestAnimationFrame(loop)}
   function loop(now){if(!running)return;const t=(now-t0)/1000;cues.forEach(c=>{if(!c.d&&t>=c.t){c.d=1;try{if(AC)c.f()}catch(e){}}});render(Math.min(t,DUR));
-    if(t>=DUR){running=false;again.style.display='block';mute.style.display='none';if(enter){enter.textContent='Start the verses ▶';enter.classList.add('big')}return}requestAnimationFrame(loop)}
-  go.onclick=again.onclick=start;
+    if(t>=DUR){running=false;if(spec.gate){startGate();return}again.style.display='block';mute.style.display='none';if(enter){enter.textContent='Start the verses ▶';enter.classList.add('big')}return}requestAnimationFrame(loop)}
+
+  /* ---------- gate: click the sword -> it becomes a Bible that opens -> verses ---------- */
+  let gateOn=false,gT0=0,ct=null;
+  const goEnter=()=>{if(window.parent!==window)window.parent.postMessage('mv-enter','*');else location.href='../index.html#verse=1'};
+  const gItems=c=>{const I=MV.I,L=[];
+    L.push(Object.assign(I('fxrays',640,300,1,1.2,2.6,{c:'gold',k:{r1:215,r2:275,n:13}}),c==null?{}:{o:[c,c+.6]}));
+    L.push(Object.assign(I('sword',640,300,1.55,0,1.6,{c:'red'}),c==null?{an:'bob'}:{o:[c+.5,c+1.1],to:[640,300,c,c+.9,.35],an:'spin'}));
+    if(c!=null){L.push(I('bible',640,300,2.2,c+.6,c+2.1,{c:'gold2',k:{open:[0,1,c+2.4,c+3.9]}}));
+      L.push(I('fxrays',640,300,1,c+3.3,c+4.2,{c:'gold',k:{r1:290,r2:350,n:15}}));L.push(I('fxsparkle',640,300,1,c+3.4,c+4.4,{c:'gold',k:{w:720,h:440}}))}
+    return L};
+  function gateFrame(g,c){ctx.setTransform(1.5,0,0,1.5,0,0);ctx.fillStyle=BG;ctx.fillRect(0,0,W,H);textDrawing=false;
+    gItems(c).forEach(it=>drawItem(it,g));
+    ctx.save();ctx.globalAlpha=c==null?1:1-seg(g,c,c+.4);writeLine('Click the sword to begin',640,655,56,seg(g,1.6,3.2),seg(g,3,3.8),{sword:'red'});ctx.restore();
+    if(c!=null){const f=seg(g,c+4.2,c+4.9);if(f>0){ctx.globalAlpha=f;ctx.fillStyle=BG;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1}}}
+  MV.gate=(g,c)=>{ov.style.display='none';gateFrame(g,c)};
+  function gloop(now){if(!gateOn)return;const g=(now-gT0)/1000;gateFrame(g,ct);
+    if(ct!=null&&g>=ct+4.9){gateOn=false;goEnter();return}requestAnimationFrame(gloop)}
+  function startGate(){gateOn=true;ct=null;gT0=performance.now();if(enter)enter.style.display='none';again.style.display='block';mute.style.display=AC?'block':'none';cv.style.cursor='default';requestAnimationFrame(gloop)}
+  const sw=(e)=>{const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*W,y=(e.clientY-r.top)/r.height*H;return x>520&&x<760&&y>50&&y<520};
+  function swordClick(){if(!gateOn||ct!=null)return;ct=(performance.now()-gT0)/1000;cv.style.cursor='default';again.style.display='none';
+    const q=(ms,f)=>setTimeout(()=>{try{if(AC)f()}catch(x){}},ms);q(0,()=>SF.zap());q(300,()=>SF.swell(2.6));q(2400,()=>SF.creak());q(3300,()=>SF.sparkle());q(3500,()=>SF.chime('G5'))}
+  cv.addEventListener('click',e=>{if(gateOn&&sw(e))swordClick()});
+  cv.addEventListener('mousemove',e=>{if(gateOn&&ct==null)cv.style.cursor=sw(e)?'pointer':'default'});
+  document.addEventListener('keydown',e=>{if(gateOn&&(e.key==='Enter'||e.key===' ')){e.preventDefault();swordClick()}});
+  go.onclick=again.onclick=()=>{gateOn=false;start()};
   mute.onclick=()=>{const m=master.gain.value>0;master.gain.value=m?0:.8;mute.textContent=m?'🔇':'🔊'};
   const ready=()=>{prep();if(dbg!==null){ov.style.display='none';render(+dbg)}else render(0)};
   (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(ready,ready);
